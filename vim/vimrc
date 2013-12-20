@@ -2,13 +2,16 @@ set nocompatible                " choose no compatibility with legacy vi
 set encoding=utf-8 " encoding for editing a file
 set fileencoding=utf-8 " encoding for writing to a file
 
-filetype off                  " required!
+set nocompatible
+filetype plugin indent on
+syntax on
+set nowrap
 
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
 " let Vundle manage Vundle
-" required! 
+" required!
 Bundle 'gmarik/vundle'
 
 " My bundles here:
@@ -30,15 +33,19 @@ Bundle 'xolox/vim-misc'
 Bundle 'xolox/vim-easytags'
 Bundle 'majutsushi/tagbar'
 Bundle 'tomasr/molokai'
+Bundle 'vim-ruby/vim-ruby'
+Bundle 'bronson/vim-trailing-whitespace'
+Bundle 'elixir-lang/vim-elixir'
 
-filetype plugin indent on " turn it back on
-
+let g:markdown_fenced_languages=['ruby', 'javascript', 'elixir', 'clojure', 'sh', 'html']
+Bundle 'tpope/vim-markdown'
+Bundle 'jtratner/vim-flavored-markdown'
 
 "" Airline bar
 let g:airline_theme='molokai'
 let g:airline_powerline_fonts=1
 
-" Theme...
+" Theme
 colorscheme molokai
 set t_Co=256
 set background=dark
@@ -106,14 +113,9 @@ inoremap <C-S-tab> <Esc>:tabprevious<CR>i
 inoremap <C-tab>   <Esc>:tabnext<CR>i
 inoremap <C-t>     <Esc>:tabnew<CR>
 
-syntax enable
 set showcmd                     " display incomplete commands
 set number
 set ruler
-
-" Show trailing whitespace and spaces before a tab:
-:highlight ExtraWhitespace ctermbg=red guibg=red
-:autocmd Syntax * syn match ExtraWhitespace /\s\+$\| \+\ze\\t/
 
 " NERDTree
 let NERDTreeChDirMode=2
@@ -127,3 +129,40 @@ nmap <leader>m :TagbarToggle<cr>
 
 " Ack
 map <leader>a :Ack! -ai
+
+" DESTROY trailing whitespace
+nmap <leader>w :FixWhitespace<cr>
+
+"""""""""""""""""""""""""
+" Specific language stuff
+augroup elixir
+  au!
+  au FileType elixir noremap <buffer> <leader>t :!mix test<cr>
+augroup END
+
+augroup vimrcEx
+  " Clear all autocmds in the group
+  autocmd!
+  autocmd FileType text setlocal textwidth=78
+  " Jump to last cursor position unless it's invalid or in an event handler
+  autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal g`\"" |
+    \ endif
+
+  " Leave the return key alone when in command line windows, since it's used
+  " to run commands there.
+  autocmd! CmdwinEnter * :unmap <cr>
+  autocmd! CmdwinLeave * :call MapCR()
+
+  au BufReadPost *.thor set syntax=ruby
+
+  " ftdetect isn't being pulled in from vim-elixir for some reason
+  au BufRead,BufNewFile *.ex,*.exs set filetype=elixir
+  au FileType elixir setl sw=2 sts=2 et iskeyword+=!,?
+
+  " ftdetect for less
+  au BufRead,BufNewFile *.less set filetype=less
+augroup END
+
+
