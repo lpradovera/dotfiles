@@ -125,3 +125,5 @@ nmap <leader>n :NERDTreeToggle<cr>
 " Tagbar
 nmap <leader>m :TagbarToggle<cr>
 
+" Ack
+map <leader>a :Ack! -ai
